@@ -2,6 +2,7 @@ package swift
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -91,6 +92,8 @@ func newSwiftClient(cfg stow.Config) (*swift.Connection, error) {
 	var client *swift.Connection
 	tenantAuthURL, _ := cfg.Config(ConfigTenantAuthURL)
 
+	yolo := ""
+
 	applicationCredentialName, ok := cfg.Config(ConfigApplicationCredentialName)
 	if ok {
 		applicationCredentialID, _ := cfg.Config(ConfigApplicationCredentialID)
@@ -103,6 +106,7 @@ func newSwiftClient(cfg stow.Config) (*swift.Connection, error) {
 			ApplicationCredentialSecret: applicationCredentialSecret,
 			Transport:                   http.DefaultTransport,
 		}
+		yolo = "app"
 	}
 
 	username, ok := cfg.Config(ConfigUsername)
@@ -119,6 +123,7 @@ func newSwiftClient(cfg stow.Config) (*swift.Connection, error) {
 			// Add Default transport
 			Transport: http.DefaultTransport,
 		}
+		yolo = "user"
 	}
 
 	if client == nil {
@@ -127,7 +132,8 @@ func newSwiftClient(cfg stow.Config) (*swift.Connection, error) {
 
 	err := client.Authenticate()
 	if err != nil {
-		return nil, errors.New("Unable to authenticate")
+		return nil, fmt.Errorf("unable to authenticate %s %s", yolo, err)
+		// return nil, errors.New("Unable to authenticate ")
 	}
 	return client, nil
 }
